@@ -1,9 +1,5 @@
-@extends('layouts.app')
-
-@section('content')
-
+<x-app>
     @include('partials._pusblish-tweet-panel ')
 
     @include('partials._tiemline')
-
-@endsection
+</x-app>

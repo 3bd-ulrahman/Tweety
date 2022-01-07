@@ -7,6 +7,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,13 +26,27 @@ Route::get('/', function () {
 
 Auth::routes();
 
-// Route::get('/home', 'HomeController@index')->name('home');
 
 
 Route::middleware('auth')->group(function () {
+
     Route::get('/tweets', 'TweetsController@index')->name('home');
     Route::post('/tweets', 'TweetsController@store');
+
+    Route::post('/profile/{user:username}/follow', 'FollowsController@store')->name('follow');
+
+    Route::get('/profile/{user:username}/edit', 'ProfilesController@edit')->middleware('can:edit,user');
+    Route::patch('/profile/{user:username}', 'ProfilesController@update')->middleware('can:edit,user');
+
+    Route::get('explore', 'ExploreController');
 });
 
-Route::get('/profile/{user}', 'profilesController@show')->name('profile');
+Route::get('/profile/{user:username}', 'ProfilesController@show')->name('profile');
 
+
+Route::get('test', function () {
+    $user = new User;
+    dd(
+        $user->follows()->pluck('id')
+    );
+});

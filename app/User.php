@@ -2,14 +2,16 @@
 
 namespace App;
 
+use App\Models\Concerns\Followable;
 use App\Models\Tweet;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 
 class User extends Authenticatable
 {
-    use Notifiable;
+    use Notifiable, Followable;
 
     /**
      * The attributes that are mass assignable.
@@ -17,7 +19,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'username', 'name', 'avatar', 'email', 'password',
     ];
 
     /**
@@ -38,35 +40,48 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function getAvatarAttribute()
+    public function getAvatarAttribute($value)
     {
-        return "https://i.pravatar.cc/40?u=" . $this->email;
+        return $value ? asset('storage/avatars/'.$value) : asset('images/default.png');
+        // return asset('storage/avatars/'.$value ?: 'images/default.png');
+    }
+
+    public function setPasswordAttribute($value = '')
+    {
+        // if (is_null($value) && strlen($value) == 0) {
+        //     return;
+        // }
+        // if (!is_null($value) && strlen($value) == 60 && preg_match('/^\$2y\$/', $value)) {
+        //     return $this->attributes['password'] = $value ?? '';
+        // } else {
+        //     return $this->attributes['password'] = Hash::make($value);
+        // }
+
+
+        if (! is_string($value) || strlen($value) == 0) {
+            return;
+        }
+        return $this->attributes['password'] = Hash::needsRehash($value) ? Hash::make($value) : $value;
+    }
+
+    public function path($append = '')
+    {
+        $path = route('profile', $this->username);
+        return $append ? "{$path}/{$append}" : $path;
     }
 
     public function timeline()
     {
-        // return Tweet::where('user_id', $this->id)->latest()->get();
         $freinds = $this->follows()->pluck('id');
 
         return Tweet::whereIn('user_id', $freinds)
             ->orWhere('user_id', $this->id)
-            ->latest()->get();
+            ->latest()->paginate(config('app.pagination'));
     }
 
     public function tweets()
     {
-        return $this->hasMany(Tweet::class, 'user_id');
-    }
-
-    public function follow(User $user)
-    {
-        return $this->follows()->save($user);
-    }
-
-    public function follows()
-    {
-        return $this->belongsToMany(User::class, 'follows', 'user_id', 'following_user_id')
-            ->withTimestamps();
+        return $this->hasMany(Tweet::class, 'user_id')->latest();
     }
 
     public function getRouteKeyName()

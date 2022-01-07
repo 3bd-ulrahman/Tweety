@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Observers\UserObserver;
+use App\User;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -23,6 +26,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        // User::observe(UserObserver::class);
+        Paginator::defaultView('vendor.pagination.tailwind');
+
+        Paginator::defaultSimpleView('vendor.pagination.simple-tailwind');
     }
 }

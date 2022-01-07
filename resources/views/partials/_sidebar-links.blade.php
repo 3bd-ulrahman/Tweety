@@ -5,7 +5,7 @@
         </a>
     </li>
     <li>
-        <a href="" class="font-bold text-lg mb-4 block">
+        <a href="{{ url('explore') }}" class="font-bold text-lg mb-4 block">
             Explore
         </a>
     </li>
@@ -35,8 +35,10 @@
         </a>
     </li>
     <li>
-        <a href="" class="font-bold text-lg mb-4 block">
-            More
-        </a>
+        <form action="/logout" method="post">
+            @csrf
+
+            <button class="font-bold text-lg">Logout</button>
+        </form>
     </li>
 </ul>

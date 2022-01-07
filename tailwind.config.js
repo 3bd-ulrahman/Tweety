@@ -1,6 +1,10 @@
 module.exports = {
   theme: {
-    extend: {},
+    extend: {
+        borderRadius: {
+            'xl': '1.25rem'
+        }
+    },
   },
   variants: {},
   plugins: [],

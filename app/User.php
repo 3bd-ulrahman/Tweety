@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Models\Concerns\Followable;
+use App\Models\Like;
 use App\Models\Tweet;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -43,7 +44,6 @@ class User extends Authenticatable
     public function getAvatarAttribute($value)
     {
         return $value ? asset('storage/avatars/'.$value) : asset('images/default.png');
-        // return asset('storage/avatars/'.$value ?: 'images/default.png');
     }
 
     public function setPasswordAttribute($value = '')
@@ -76,12 +76,19 @@ class User extends Authenticatable
 
         return Tweet::whereIn('user_id', $freinds)
             ->orWhere('user_id', $this->id)
-            ->latest()->paginate(config('app.pagination'));
+            ->withLikes()
+            ->latest()
+            ->paginate(config('app.pagination'));
     }
 
     public function tweets()
     {
         return $this->hasMany(Tweet::class, 'user_id')->latest();
+    }
+
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
     }
 
     public function getRouteKeyName()

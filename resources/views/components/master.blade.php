@@ -38,6 +38,7 @@
     </div>
 
 
-@stack('script')
+    @stack('script')
+    <script src="http://unpkg.com/turbolinks"></script>
 </body>
 </html>
